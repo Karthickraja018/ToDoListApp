@@ -51,15 +51,57 @@ namespace ToDoApp.Models
             }
         }
 
-        public async Task<IEnumerable<Todo>> GetAllAsync()
+        public async Task<PagedResponse<Todo>> GetAllAsync(PaginationParams paginationParams)
         {
-            var todo = await _context.Todos.ToListAsync();
-            if (todo == null)
-            {
-                throw new Exception(" No Todo items found");
-            }
-            return todo;
+            var query = _context.Todos.AsQueryable();
 
+            if (!string.IsNullOrWhiteSpace(paginationParams.SearchTerm))
+            {
+                query = query.Where(t => 
+                    t.Title.Contains(paginationParams.SearchTerm) || 
+                    t.Description.Contains(paginationParams.SearchTerm));
+            }
+
+            if (paginationParams.IsCompleted.HasValue)
+            {
+                query = query.Where(t => t.IsCompleted == paginationParams.IsCompleted.Value);
+            }
+
+            if (paginationParams.Priority.HasValue)
+            {
+                query = query.Where(t => t.Priority == paginationParams.Priority.Value);
+            }
+
+            if (paginationParams.DueDateFrom.HasValue)
+            {
+                query = query.Where(t => t.DueDate >= paginationParams.DueDateFrom.Value);
+            }
+
+            if (paginationParams.DueDateTo.HasValue)
+            {
+                query = query.Where(t => t.DueDate <= paginationParams.DueDateTo.Value);
+            }
+
+            var totalRecords = await query.CountAsync();
+
+            var todos = await query
+                .OrderByDescending(t => t.CreatedDate)
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize)
+                .ToListAsync();
+
+            var totalPages = (int)Math.Ceiling(totalRecords / (double)paginationParams.PageSize);
+
+            return new PagedResponse<Todo>
+            {
+                Data = todos,
+                PageNumber = paginationParams.PageNumber,
+                PageSize = paginationParams.PageSize,
+                TotalRecords = totalRecords,
+                TotalPages = totalPages,
+                HasPrevious = paginationParams.PageNumber > 1,
+                HasNext = paginationParams.PageNumber < totalPages
+            };
         }
 
         public async Task<Todo> GetByIdAsync(Guid id)

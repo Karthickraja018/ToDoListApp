@@ -6,7 +6,7 @@ namespace ToDoApp.Services
 {
     public interface ITodoServices
     {
-        Task<IEnumerable<Todo>> GetAllAsync();
+        Task<PagedResponse<Todo>> GetAllAsync(PaginationParams paginationParams);
         Task<Todo> GetByIdAsync(Guid id);
         Task CreateTodoAsync(CreateTodo request);
         Task UpdateTodoAsync(Guid id, UpdateTodo request);

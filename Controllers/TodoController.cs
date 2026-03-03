@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ToDoApp.DTOs;
+using ToDoApp.Models;
 using ToDoApp.Services;
 
 namespace ToDoApp.Controllers
@@ -17,23 +18,35 @@ namespace ToDoApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginationParams paginationParams)
         {
             try
             {
-                var todo = await _todoServices.GetAllAsync();
-                if (todo == null || !todo.Any())
+                var response = await _todoServices.GetAllAsync(paginationParams);
+                
+                if (response.Data == null || !response.Data.Any())
                 {
-                    return Ok(new { message = "No Todo Items  found" });
+                    return Ok(new { message = "No Todo Items found" });
                 }
-                return Ok(new { message = "Successfully retrieved all blog posts", data = todo });
-
+                
+                return Ok(new 
+                { 
+                    message = "Successfully retrieved all todo items", 
+                    data = response.Data,
+                    pagination = new
+                    {
+                        pageNumber = response.PageNumber,
+                        pageSize = response.PageSize,
+                        totalRecords = response.TotalRecords,
+                        totalPages = response.TotalPages,
+                        hasPrevious = response.HasPrevious,
+                        hasNext = response.HasNext
+                    }
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An error occurred while retrieving all Tood it posts", error = ex.Message });
-
-
+                return StatusCode(500, new { message = "An error occurred while retrieving all Todo items", error = ex.Message });
             }
         }
 
