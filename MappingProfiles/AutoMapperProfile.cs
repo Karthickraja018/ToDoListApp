@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
 using ToDoApp.DTOs;
 using ToDoApp.Models;
-using ToDoApp.DTOs;
-using ToDoApp.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ToDoApp.MappingProfiles
 {
@@ -11,15 +8,17 @@ namespace ToDoApp.MappingProfiles
     {
         public AutoMapperProfile()
         {
-            CreateMap<CreateTodo, Todo>()
+            CreateMap<CreateTodoDto, Todo>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
-                .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore());
+                .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore())
+                .ForMember(dest => dest.AssignedToUser, opt => opt.Ignore());
 
-            CreateMap<UpdateTodo, Todo>()
+            CreateMap<UpdateTodoDto, Todo>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.CreatedDate, opt => opt.Ignore())
-                .ForMember(dest => dest.UpdatedDate, opt => opt.Ignore());
+                .ForMember(dest => dest.CreatedByUserId, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore())
+                .ForMember(dest => dest.AssignedToUser, opt => opt.Ignore());
         }
     }
 }

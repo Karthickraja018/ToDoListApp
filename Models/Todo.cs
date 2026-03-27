@@ -1,24 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ToDoApp.Models
+﻿namespace ToDoApp.Models
 {
     public class Todo
     {
-        public Todo()
-        {
-            IsCompleted = false;
-        }
-
-        [Key]
-        //public int Id { get; set; }
-        public Guid Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
-        public int Priority { get; set; }
-        public bool IsCompleted { get; set; }
-        public DateTime DueDate { get; set; }
-
+        public int Id { get; set; }
+        public string Title { get; set; } = null!;
+        public string? Description { get; set; }
+        public bool IsCompleted { get; set; } = false;
+        public DateTime? DueDate { get; set; }
+        public int CreatedByUserId { get; set; }
+        public User? CreatedByUser { get; set; }
+        public int? AssignedToUserId { get; set; }
+        public User? AssignedToUser { get; set; }
     }
 }

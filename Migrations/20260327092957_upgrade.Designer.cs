@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToDoApp.Data;
 
@@ -11,9 +12,11 @@ using ToDoApp.Data;
 namespace ToDoApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260327092957_upgrade")]
+    partial class upgrade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,14 +89,14 @@ namespace ToDoApp.Migrations
                         new
                         {
                             Id = 1,
-                            PasswordHash = "$2a$11$7EqJtq98hPqEX7fNZaFWo.VpkS2w6QAIxWunpZqy5.lRzZgQGS8wi",
+                            PasswordHash = "$2a$11$rXw8EDMoc5VoLcCVTYzf8egIcGcoxkyrMc.AidnV5ZNNI97RRhhGa",
                             Role = "Manager",
                             Username = "manager1"
                         },
                         new
                         {
                             Id = 2,
-                            PasswordHash = "$2a$11$7EqJtq98hPqEX7fNZaFWo.VpkS2w6QAIxWunpZqy5.lRzZgQGS8wi",
+                            PasswordHash = "$2a$11$hPKFhyQdANvZY8ySmPNR1ugQy8XHtmcZFtVuGgv9t9HxBiQh3GHUO",
                             Role = "Employee",
                             Username = "employee1"
                         });

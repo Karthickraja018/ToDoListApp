@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using ToDoApp.Data;
 using ToDoApp.Middleware;
-using ToDoApp.Models;
 using ToDoApp.Services;
-using AutoMapper;
 
 namespace ToDoApp
 {
@@ -13,31 +14,45 @@ namespace ToDoApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
             builder.Services.AddProblemDetails();
 
-            builder.Services.AddLogging();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("constr")));
 
-            builder.Services.AddDbContext<AppDbContext>(
-                options => options.UseSqlServer(builder.Configuration.GetConnectionString("constr")
-                )
-             );
+            var jwtSection = builder.Configuration.GetSection("JwtSettings");
+            var secret = jwtSection.GetValue<string>("Secret") ?? "DefaultSuperSecretKeyForDevOnlyChangeMe123!";
+            var issuer = jwtSection.GetValue<string>("Issuer") ?? "todo-demo";
+            var audience = jwtSection.GetValue<string>("Audience") ?? "todo-demo-audience";
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
 
-            builder.Services.AddScoped<ITodoServices, TodoServices>();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true,
+                        ValidIssuer = issuer,
+                        ValidAudience = audience,
+                        IssuerSigningKey = key,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+
+            builder.Services.AddAuthorization();
+            builder.Services.AddScoped<ITodoService, TodoService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -45,12 +60,9 @@ namespace ToDoApp
             }
 
             app.UseHttpsRedirection();
-
-            app.UseExceptionHandler(); //Add this line for Exception
-
+            app.UseExceptionHandler();
+            app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
